@@ -22,6 +22,9 @@
 // LED setup
 #define NUM_LEDS             300
 #define DATA_PIN             3
+#define RELAY_PIN            22
+#define RELAY_ON 0
+#define RELAY_OFF 1
 //#define CLOCK_PIN            4
 #define LED_COLOR_ORDER      GBR//GBR
 int BRIGHTNESS     =         100;
@@ -130,6 +133,10 @@ void setup() {
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(BRIGHTNESS);
     FastLED.setDither(1);
+
+    // Setup Relay
+    digitalWrite(RELAY_PIN, RELAY_ON);
+    pinMode(RELAY_PIN, OUTPUT);
 
     loadLevel();
 }
@@ -332,6 +339,16 @@ void loop() {
       else if (inputString.startsWith("N")){
         nextLevel();
       }
+
+      // Lights ON
+      else if (inputString.startsWith("I")){
+        digitalWrite(RELAY_PIN, RELAY_ON);
+      }
+      // Lights OFF
+      else if (inputString.startsWith("O")){
+        digitalWrite(RELAY_PIN, RELAY_OFF);
+      }
+      
       // Brightness Up
       else if (inputString.startsWith("U")){
         if(BRIGHTNESS < 245)
