@@ -28,7 +28,7 @@
 
 // Sleep Mode
 int     SLEEP_MODE =         1;    // default sleep mode (1-SLEEP_MODE_MAX)
-#define SLEEP_MODE_MAX       2     // the number of sleep modes that have been created
+#define SLEEP_MODE_MAX       3     // the number of sleep modes that have been created
 #define TIMEOUT              10000 // time before screensaver is turned on
 
 #define LED_COLOR_ORDER      GBR   // could also be GBR
@@ -352,6 +352,12 @@ void loop() {
       // Lights OFF
       else if (inputString.startsWith("O")){
         digitalWrite(RELAY_PIN, RELAY_OFF);
+      }
+      // Change Sleep Mode
+      else if (inputString.startsWith("M")){
+        SLEEP_MODE++;
+        if(SLEEP_MODE > SLEEP_MODE_MAX)
+          SLEEP_MODE = 1;
       }
       
       // Brightness Up
@@ -817,27 +823,35 @@ void screenSaverTick(){
     for(i = 0; i<NUM_LEDS; i++){
         leds[i].nscale8(250);
     }
-    if(SLEEP_MODE == 1){
-        // Marching green <> orange
-        n = (mm/250)%10;
-        b = 10+((sin(mm/500.00)+1)*20.00);
-        c = 20+((sin(mm/5000.00)+1)*33);
-        for(i = 0; i<NUM_LEDS; i++){
-            if(i%10 == n){
-                leds[i] = CHSV( c, 255, 150);
+    switch (SLEEP_MODE) {
+        case 1: // Marching green <> orange
+            n = (mm/250)%10;
+            b = 10+((sin(mm/500.00)+1)*20.00);
+            c = 20+((sin(mm/5000.00)+1)*33);
+            for(i = 0; i<NUM_LEDS; i++){
+                if(i%10 == n){
+                    leds[i] = CHSV( c, 255, 150);
+                }
             }
-        }
-    }else if(SLEEP_MODE == 2){
-        // Random flashes
-        randomSeed(mm);
-        for(i = 0; i<NUM_LEDS; i++){
-            if(random16(800) == 0){
-              if(random8(2) == 0)
-                leds[i] = CRGB(BRIGHTNESS, BRIGHTNESS, BRIGHTNESS);
-              else
-                leds[i] = CRGB(0, 0, BRIGHTNESS);
+            break;
+
+        case 2: // Random flashes
+            randomSeed(mm);
+            for(i = 0; i<NUM_LEDS; i++){
+                if(random16(800) == 0){
+                    if(random8(2) == 0)
+                        leds[i] = CRGB(BRIGHTNESS, BRIGHTNESS, BRIGHTNESS);
+                    else
+                        leds[i] = CRGB(0, 0, BRIGHTNESS);
+                }
             }
-        }
+            break;
+
+        case 3: // White Light
+            for(i = 0; i<NUM_LEDS; i++){
+                leds[i] = CRGB(BRIGHTNESS/5, BRIGHTNESS/5, BRIGHTNESS/8);
+            }
+            break;
     }
 }
 
