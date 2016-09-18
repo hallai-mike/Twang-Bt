@@ -25,19 +25,23 @@
 #define RELAY_PIN            22
 #define RELAY_ON 0
 #define RELAY_OFF 1
-//#define CLOCK_PIN            4
-#define LED_COLOR_ORDER      GBR//GBR
+
+// Sleep Mode
+int     SLEEP_MODE =         1;    // default sleep mode (1-SLEEP_MODE_MAX)
+#define SLEEP_MODE_MAX       2     // the number of sleep modes that have been created
+#define TIMEOUT              10000 // time before screensaver is turned on
+
+#define LED_COLOR_ORDER      GBR   // could also be GBR
 int BRIGHTNESS     =         100;
 #define DIRECTION            1     // 0 = right to left, 1 = left to right
 #define MIN_REDRAW_INTERVAL  16    // Min redraw interval (ms) 33 = 30fps / 16 = 63fps
 #define USE_GRAVITY          0     // 0/1 use gravity (LED strip going up wall)
-#define BEND_POINT           1000   // 0/1000 point at which the LED strip goes up the wall
+#define BEND_POINT           1000  // 0/1000 point at which the LED strip goes up the wall
 
 // GAME
 long previousMillis = 0;           // Time of the last redraw
 int levelNumber = 0;
 long lastInputTime = 0;
-#define TIMEOUT              30000
 #define LEVEL_COUNT          16
 #define MAX_VOLUME           5
 long animationFrame = 0;
@@ -193,7 +197,8 @@ void loop() {
                 stage = "WIN";
             }
         }else{
-            if(lastInputTime+TIMEOUT < mm){
+            if((lastInputTime+TIMEOUT < mm) && stage!="SCREENSAVER"){
+                SLEEP_MODE = ((millis()/20000)%2)+1;
                 stage = "SCREENSAVER";
             }
         }
@@ -807,12 +812,12 @@ bool inLava(int pos){
 void screenSaverTick(){
     int n, b, c, i;
     long mm = millis();
-    int mode = (mm/20000)%2;
+    
     
     for(i = 0; i<NUM_LEDS; i++){
         leds[i].nscale8(250);
-    }/*
-    if(mode == 0){
+    }
+    if(SLEEP_MODE == 1){
         // Marching green <> orange
         n = (mm/250)%10;
         b = 10+((sin(mm/500.00)+1)*20.00);
@@ -822,7 +827,7 @@ void screenSaverTick(){
                 leds[i] = CHSV( c, 255, 150);
             }
         }
-    }else if(mode == 1){*/
+    }else if(SLEEP_MODE == 2){
         // Random flashes
         randomSeed(mm);
         for(i = 0; i<NUM_LEDS; i++){
@@ -833,7 +838,7 @@ void screenSaverTick(){
                 leds[i] = CRGB(0, 0, BRIGHTNESS);
             }
         }
-    //}
+    }
 }
 
 // ---------------------------------
