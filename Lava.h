@@ -1,3 +1,6 @@
+#ifndef LAVA_H
+#define LAVA_H
+
 #include "Arduino.h"
 
 class Lava
@@ -35,3 +38,6 @@ void Lava::Kill(){
 int Lava::Alive(){
 	return _alive;
 }
+
+
+#endif

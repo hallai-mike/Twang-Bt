@@ -1,3 +1,6 @@
+#ifndef ENEMY_H
+#define ENEMY_H
+
 #include "Arduino.h"
 
 class Enemy
@@ -53,3 +56,5 @@ bool Enemy::Alive(){
 void Enemy::Kill(){
 	_alive = 0;
 }
+
+#endif

@@ -1,3 +1,6 @@
+#ifndef SPAWNER_H
+#define SPAWNER_H
+
 #include "Arduino.h"
 
 class Spawner
@@ -33,3 +36,6 @@ void Spawner::Kill(){
 int Spawner::Alive(){
 	return _alive;
 }
+
+
+#endif

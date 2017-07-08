@@ -14,11 +14,48 @@
 #include "Boss.h"
 #include "Conveyor.h"
 
+// POOLS
+int lifeLEDs[3] = {52, 50, 40};
+Enemy enemyPool[10] = {
+	Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy()
+};
+int const enemyCount = 10;
+Particle particlePool[40] = {
+	Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle()
+};
+int const particleCount = 40;
+Spawner spawnPool[2] = {
+	Spawner(), Spawner()
+};
+int const spawnCount = 2;
+Lava lavaPool[4] = {
+	Lava(), Lava(), Lava(), Lava()
+};
+int const lavaCount = 4;
+Conveyor conveyorPool[2] = {
+	Conveyor(), Conveyor()
+};
+int const conveyorCount = 2;
+Boss boss = Boss();
+
+void spawnEnemy(int pos, int dir, int sp, int wobble){
+	for(int e = 0; e<enemyCount; e++){
+		if(!enemyPool[e].Alive()){
+			enemyPool[e].Spawn(pos, dir, sp, wobble);
+			enemyPool[e].playerSide = pos > playerPosition?1:-1;
+			return;
+		}
+	}
+}
+
+#include "Levels.h"
+
 // gets rid of annoying "deprecated conversion from string constant blah blah" warning
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 // LED Setup
 #define NUM_LEDS             303
+#define STRIP_START			 3     // Location after life indicators where continuous strip starts
 #define DATA_PIN             3
 #define RELAY_PIN            22
 #define LED_COLOR_ORDER      GBR
@@ -86,29 +123,7 @@ int lives =                  3;    // number of lives the player starts with
 
 
 
-// POOLS
-int lifeLEDs[3] = {52, 50, 40};
-Enemy enemyPool[10] = {
-	Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy(), Enemy()
-};
-int const enemyCount = 10;
-Particle particlePool[40] = {
-	Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle(), Particle()
-};
-int const particleCount = 40;
-Spawner spawnPool[2] = {
-	Spawner(), Spawner()
-};
-int const spawnCount = 2;
-Lava lavaPool[4] = {
-	Lava(), Lava(), Lava(), Lava()
-};
-int const lavaCount = 4;
-Conveyor conveyorPool[2] = {
-	Conveyor(), Conveyor()
-};
-int const conveyorCount = 2;
-Boss boss = Boss();
+
 
 
 
@@ -143,7 +158,7 @@ void setup()
 	pinMode(RELAY_PIN, OUTPUT);
 
 	// Get First Level Ready
-	loadLevel();
+	//loadLevel();
 }
 
 // Main Game Loop
@@ -248,7 +263,7 @@ void loop()
 		else if(stage == "DEAD"){
 			FastLED.clear();
 			if(!tickParticles()){
-				loadLevel();
+				//loadLevel();
 			}
 		}
 		// A Level Was Completed
@@ -380,126 +395,18 @@ void loop()
 } // end of main loop
 
 
-// ---------------------------------
-// ------------ LEVELS -------------
-// ---------------------------------
-void loadLevel(){
-	//updateLives();
+// 00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000    0000
+void setupNewLevel(int levelNumber){
 	cleanupLevel();
 	playerPosition = 0;
 	playerAlive = 1;
-	switch(levelNumber){
-		case 0:
-			// Left or right?
-			playerPosition = 200;
-			spawnEnemy(1, 0, 0, 0);
-			break;
-		case 1:
-			// Slow moving enemy
-			spawnEnemy(900, 0, 1, 0);
-			break;
-		case 2:
-			// Spawning enemies at exit every 3 seconds
-			spawnPool[0].Spawn(1000, 3000, 2, 0, 0);
-			break;
-		case 3:
-			// Lava intro
-			spawnLava(400, 490, 2000, 2000, 0, "OFF");
-			spawnPool[0].Spawn(1000, 5500, 3, 0, 0);
-			break;
-		case 4:
-			// 2 Sin enemies
-			spawnEnemy(700, 1, 7, 275);
-			spawnEnemy(500, 1, 5, 250);
-			break;
-		case 5:
-			// Conveyor and stationary enemy
-			spawnConveyor(100, 600, -1);
-			spawnEnemy(800, 0, 0, 0);
-			break;
-		case 6:
-			// water towards lots of enemies
-			spawnConveyor(50, 1000, 1);
-			spawnEnemy(300, 0, 0, 0);
-			spawnEnemy(400, 0, 0, 0);
-			spawnEnemy(500, 0, 0, 0);
-			spawnEnemy(600, 0, 0, 0);
-			spawnEnemy(700, 0, 0, 0);
-			spawnEnemy(800, 0, 0, 0);
-			spawnEnemy(900, 0, 0, 0);
-			break;
-		case 7:
-			// Conveyor and lava pit
-			spawnConveyor(200, 600, -1);
-			spawnLava(601, 710, 1500, 2000, 0, "OFF");
-			spawnEnemy(800, 0, 0, 0);
-			break;
-		case 8:
-			spawnLava(195, 800, 1000, 2800, 0, "OFF");
-			break;
-		case 9:
-			// Sin enemy #2
-			spawnEnemy(700, 1, 7, 275);
-			spawnEnemy(500, 1, 5, 250);
-			//spawnPool[0].Spawn(1000, 5500, 4, 0, 3000);
-			//spawnPool[1].Spawn(0, 5500, 5, 1, 10000);
-			spawnConveyor(100, 900, -1);
-			break;
-		case 10:
-			// 4 lava pits
-			spawnLava(195, 300, 2000, 2000, 0, "OFF");
-			spawnLava(350, 455, 2000, 2000, 0, "OFF");
-			spawnLava(510, 610, 2000, 2000, 0, "OFF");
-			spawnLava(660, 760, 2000, 2000, 0, "OFF");
-			spawnPool[0].Spawn(1000, 3800, 4, 0, 0);
-			break;
-		case 11:
-			// Sin enemy #2
-			spawnEnemy(700, 1, 7, 275);
-			spawnEnemy(500, 1, 5, 250);
-			spawnPool[0].Spawn(1000, 5500, 4, 0, 3000);
-			spawnPool[1].Spawn(0, 5500, 5, 1, 10000);
-			spawnConveyor(100, 300, -1);
-			spawnConveyor(301, 600, 1);
-			//spawnConveyor(601, 900, -1);
-			break;
-		case 12:
-			spawnLava(110, 400, 1000, 2800, 0, "ON");
-			spawnLava(405, 845, 1000, 2800, 0, "OFF");
-			break;
-		case 13:
-			spawnLava(110, 200, 1000, 2800, 0, "OFF");
-			spawnLava(510, 600, 1000, 2800, 0, "ON");
-			spawnPool[0].Spawn(1000, 3200, 5, 0, 0);
-			spawnPool[1].Spawn(1000, 3200, 4, 0, 300);
-		//    spawnPool[2].Spawn(1000, 3800, 4, 0, 800);
-			break;
-		case 14:
-			// 4 Lava pits with 2 sin enemies
-			spawnEnemy(700, 1, 7, 275);
-			spawnEnemy(500, 1, 5, 250);
-			spawnLava(195, 300, 2000, 2000, 0, "OFF");
-			spawnConveyor(304, 336, -1);
-			spawnLava(340, 455, 2000, 2000, 0, "OFF");
-			spawnLava(500, 610, 2000, 2000, 0, "OFF");
-			spawnLava(650, 760, 2000, 2000, 0, "OFF");
-			spawnPool[0].Spawn(1000, 3800, 4, 0, 0);
-			break;
-		case 15:
-			spawnEnemy(700, 1, 7, 275);
-			spawnEnemy(500, 1, 5, 250);
-			spawnEnemy(400, 1, 7, 175);
-			spawnEnemy(300, 1, 5, 100);
-			spawnEnemy(800, 1, 9, 100);
-			break;
-		case 16:
-			// Boss
-			spawnBoss();
-			break;
-	}
+
+	//loadLevel(levelNumber);
+
 	stageStartTime = millis();
 	stage = "PLAY";
 }
+
 
 void spawnBoss(){
 	boss.Spawn();
@@ -514,15 +421,7 @@ void moveBoss(){
 	spawnPool[1].Spawn(boss._pos, spawnSpeed, 3, 1, 0);
 }
 
-void spawnEnemy(int pos, int dir, int sp, int wobble){
-	for(int e = 0; e<enemyCount; e++){
-		if(!enemyPool[e].Alive()){
-			enemyPool[e].Spawn(pos, dir, sp, wobble);
-			enemyPool[e].playerSide = pos > playerPosition?1:-1;
-			return;
-		}
-	}
-}
+
 
 void spawnLava(int left, int right, int ontime, int offtime, int offset, char* state){
 	for(int i = 0; i<lavaCount; i++){
@@ -566,7 +465,6 @@ void levelComplete(){
 	stage = "WIN";
 	if(levelNumber == LEVEL_COUNT) stage = "COMPLETE";
 	lives = 3;
-	//updateLives();
 }
 
 void nextLevel(){
@@ -574,12 +472,12 @@ void nextLevel(){
 	Serial.write("NNNN\n");
 	playerPositionModifier = 0;
 	if(levelNumber > LEVEL_COUNT) levelNumber = 0;
-	loadLevel();
+	//loadLevel();
 }
 
 void gameOver(){
 	levelNumber = 0;
-	loadLevel();
+	//loadLevel();
 }
 
 void die(){
@@ -671,7 +569,7 @@ void drawLives(){
 	  if(lives>=2) {
 		leds[1] = CRGB(0, BRIGHTNESS*.6, 0);
 		if(lives>=3)
-		  leds[0] = CRGB(0, BRIGHTNESS*.6, 0);
+			leds[0] = CRGB(0, BRIGHTNESS*.6, 0);
 	  }
 	}
 }
@@ -748,7 +646,6 @@ bool tickParticles(){
 void tickConveyors(){
 	int b, dir, n, i, ss, ee, led;
 	long m = 10000+millis();
-	//playerPositionModifier = 0;
 	
 	for(i = 0; i<conveyorCount; i++){
 		if(conveyorPool[i]._alive){
@@ -765,23 +662,16 @@ void tickConveyors(){
 			
 			if(playerPosition > conveyorPool[i]._startPoint && playerPosition < conveyorPool[i]._endPoint){
 				if(inWater == 0){
-				  inWater = 1;
-				  if(conveyorPool[i]._dir == 1)
-					playerPositionModifier = 3;
-				  else
-					playerPositionModifier = -3;
+					inWater = 1;
+					if(conveyorPool[i]._dir == 1)
+						playerPositionModifier = 3;
+					else
+						playerPositionModifier = -3;
 				}
-				//if(dir == -1){
-				  //  playerPositionModifier = playerPositionModifier - 10; //= -(MAX_PLAYER_SPEED-4);
-				 // joystickTilt = joystickTilt/2;
-				//}else{
-				   // playerPositionModifier = (MAX_PLAYER_SPEED-4);
-				//}
 			}
 			else {
-			  inWater = 0;
-			  playerPositionModifier = 0;
-			//  joystickTilt = joystickTilt*2;
+				inWater = 0;
+				playerPositionModifier = 0;
 			}
 		}
 	}
@@ -803,9 +693,9 @@ void drawAttack(){
 	leds[getLED(playerPosition+(ATTACK_WIDTH/2))] = CRGB(BRIGHTNESS, n, BRIGHTNESS);
 }
 
+// The world is 1000 pixels wide, this converts world units into an LED number
 int getLED(int pos){
-	// The world is 1000 pixels wide, this converts world units into an LED number
-	return constrain((int)map(pos, 0, 1000, 0, NUM_LEDS-1), 3, NUM_LEDS-1);
+	return constrain((int)map(pos, 0, 1000, 0, NUM_LEDS-1), STRIP_START, NUM_LEDS-1);
 }
 
 bool inLava(int pos){

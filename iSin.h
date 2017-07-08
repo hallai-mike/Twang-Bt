@@ -1,3 +1,6 @@
+#ifndef ISIN_H
+#define ISIN_H
+
 #include "Arduino.h"
 
 class iSin
@@ -36,3 +39,5 @@ int iSin::convert(long x)
 		if (pos) return isinTable8[x]/2 ;
 		return -isinTable8[x]/2 ;
 }
+
+#endif
